@@ -32,6 +32,27 @@ public class SeriesRepo {
     public LiveData<List<Serie>> getSeriesLiveData() {
         return seriesLiveData;
     }
+    public void getPopularSeries(int page, Callback<SeriesResponse> callback) {
+        apiService.getSeries(API_KEY, page).enqueue(callback);
+    }
+
+    public void searchSeries(String query) {
+        apiService.searchSeries(query, API_KEY).enqueue(new Callback<SeriesResponse>() {
+            @Override
+            public void onResponse(Call<SeriesResponse> call, Response<SeriesResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    seriesLiveData.postValue(response.body().getResults());
+                }
+                // handle else case if needed
+            }
+
+            @Override
+            public void onFailure(Call<SeriesResponse> call, Throwable t) {
+                // handle failure if needed
+            }
+        });
+    }
+
 
     public void getSerieById(int serieId, Callback<Serie> callback) {
         Call<Serie> call = apiService.getSerieById(serieId, API_KEY); // Ensure API key is correct
