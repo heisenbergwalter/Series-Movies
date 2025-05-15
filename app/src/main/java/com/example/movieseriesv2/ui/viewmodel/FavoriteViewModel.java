@@ -18,6 +18,8 @@ public class FavoriteViewModel extends AndroidViewModel {
     private FavoriteRepository repository;
     private MutableLiveData<List<Favorite>> favorites = new MutableLiveData<>();
 
+
+
     public FavoriteViewModel(Application application) {
         super(application);
         repository = new FavoriteRepository(application);
