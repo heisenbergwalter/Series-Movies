@@ -25,7 +25,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     public static final String EXTRA_LANGUAGE = "language";
     public static final String EXTRA_POPULARITY = "popularity";
     public static final String EXTRA_DATE = "date";
-    public static final String EXTRA_ID = "movie_id";  // updated to meaningful key name
+    public static final String EXTRA_ID = "movie_id";
     public static final String EXTRA_TITLE = "title";
     public static final String EXTRA_POSTER = "poster_path";
     public static final String EXTRA_OVERVIEW = "overview";
@@ -53,39 +53,53 @@ public class MovieDetailActivity extends AppCompatActivity {
         double rating = getIntent().getDoubleExtra(EXTRA_VOTE, 0.0);
         rate.setRating((float) rating / 2);
 
-        title.setText(getIntent().getStringExtra(EXTRA_TITLE));
+        String movieTitle = getIntent().getStringExtra(EXTRA_TITLE);
+        int movieId = getIntent().getIntExtra(EXTRA_ID, -1);
+        String posterPath = getIntent().getStringExtra(EXTRA_POSTER);
+        int userId = sessionManager.getUserId();
+
+        title.setText(movieTitle);
         overviewText.setText(getIntent().getStringExtra(EXTRA_OVERVIEW));
         releaseDateText.setText("Release: " + getIntent().getStringExtra(EXTRA_DATE));
         voteText.setText("Rating: " + rating);
 
         Glide.with(this)
-                .load("https://image.tmdb.org/t/p/w500" + getIntent().getStringExtra(EXTRA_POSTER))
+                .load("https://image.tmdb.org/t/p/w500" + posterPath)
                 .into(posterImage);
 
-        btn.setOnClickListener(v -> {
-            if (sessionManager.isLoggedIn()) {
-                int movieId = getIntent().getIntExtra(EXTRA_ID, -1);
-                if (movieId == -1) {
-                    Toast.makeText(this, "Invalid movie ID!", Toast.LENGTH_SHORT).show();
-                    Log.e("MovieDetailActivity", "Movie ID is missing or invalid.");
-                    return;
+        if (movieId == -1) {
+            Toast.makeText(this, "Invalid movie ID!", Toast.LENGTH_SHORT).show();
+            Log.e("MovieDetailActivity", "Movie ID is missing or invalid.");
+            return;
+        }
+
+        Favorite favorite = new Favorite();
+        favorite.id = movieId;
+        favorite.title = movieTitle;
+        favorite.type = "movie";
+        favorite.userId = userId;
+
+        if (!sessionManager.isLoggedIn()) {
+            btn.setEnabled(false);
+            btn.setText("Login to Favorite");
+            return;
+        }
+
+        // Observe if movie is already in favorites
+        viewModel.isFavoriteMovie(movieId, userId).observe(this, isFav -> {
+            btn.setText(isFav ? "Remove from Favorites" : "Add to Favorites");
+
+            btn.setOnClickListener(v -> {
+                if (isFav) {
+                    viewModel.removeFavorite(favorite);
+
+                    Toast.makeText(this, "Movie removed from favorites", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    viewModel.addFavorite(favorite);
+                    Toast.makeText(this, "Movie added to favorites", Toast.LENGTH_SHORT).show();
                 }
-
-                Favorite favorite = new Favorite();
-                favorite.id = movieId;
-                favorite.title = getIntent().getStringExtra(EXTRA_TITLE);
-                favorite.type = "movie";
-                favorite.userId = sessionManager.getUserId();
-
-                Log.w("idUser", String.valueOf(favorite.userId));
-                Log.w("IDmovie", String.valueOf(favorite.id));
-
-                viewModel.addFavorite(favorite);
-                Log.d("FavoriteDao", "Inserting favorite: " + favorite.getTitle());
-                Toast.makeText(this, "Movie added to favorites", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Please log in to add favorites.", Toast.LENGTH_SHORT).show();
-            }
+            });
         });
     }
 }

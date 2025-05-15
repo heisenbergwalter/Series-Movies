@@ -79,4 +79,11 @@ public class FavoriteRepository {
         });
 
     }
+
+    public void isFavoriteMovie(int movieId, int userId, Consumer<Boolean> callback) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            boolean exists = favoriteDao.countFavoriteMovie(movieId, userId) > 0;
+            mainHandler.post(() -> callback.accept(exists));
+        });
+    }
 }

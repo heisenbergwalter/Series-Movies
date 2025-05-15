@@ -55,6 +55,12 @@ public class FavoriteViewModel extends AndroidViewModel {
         return movies;
     }
 
+    public LiveData<Boolean> isFavoriteMovie(int movieId, int userId) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+        repository.isFavoriteMovie(movieId, userId, result::postValue);
+        return result;
+    }
+
     // ✅ Get all favorite series for user
     public LiveData<List<Favorite>> getFavoriteSeries(int userId) {
         MutableLiveData<List<Favorite>> series = new MutableLiveData<>();

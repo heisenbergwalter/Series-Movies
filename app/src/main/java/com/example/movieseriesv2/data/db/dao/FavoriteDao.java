@@ -14,9 +14,14 @@ public interface FavoriteDao {
     @Insert( onConflict = OnConflictStrategy.REPLACE)
     void insertFavorite(Favorite favorite);
 
-    // Custom query to delete by itemId and userId
+
+
     @Query("DELETE FROM favorites WHERE title = :title AND user_id = :userId")
     void deleteFavorite(String title, int userId);
+
+    @Query("SELECT COUNT(*) FROM favorites WHERE id = :movieId AND user_id = :userId AND type = 'movie'")
+    int countFavoriteMovie(int movieId, int userId);
+
 
     @Query("SELECT COUNT(*) FROM favorites WHERE id = :serieId AND user_id = :userId AND type = 'serie'")
     int countFavorite(int serieId, int userId);

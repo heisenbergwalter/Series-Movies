@@ -23,7 +23,9 @@ import com.example.movieseriesv2.ui.home.MovieAdapter;
 import com.example.movieseriesv2.ui.viewmodel.FavoriteViewModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,23 +65,31 @@ public class FavoriteMovies extends Fragment {
         return view;
     }
 
+    Set<Integer> addedMovieIds = new HashSet<>();
+
     private void loadFavoriteMovies() {
         favoriteViewModel.getFavorites(userId).observe(getViewLifecycleOwner(), favorites -> {
-            Log.d("FavoriteMovies", "Favorites loaded: " + favorites.size());
             favoriteMovies.clear();
-            if (favorites.isEmpty()) {
+            addedMovieIds.clear();
+            movieAdapter.notifyDataSetChanged();
+
+            if (favorites == null || favorites.isEmpty()) {
                 Log.d("FavoriteMovies", "No favorites found.");
                 return;
             }
 
             for (Favorite fav : favorites) {
-                if ("movie".equalsIgnoreCase(fav.getType())) {
+                if ("movie".equalsIgnoreCase(fav.getType()) && !addedMovieIds.contains(fav.getFavId())) {
                     fetchMovieById(fav.getFavId());
                 }
             }
         });
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadFavoriteMovies();// reload every time the fragment is shown again
+    }
 
 
     private void fetchMovieById(int movieId) {
@@ -87,8 +97,11 @@ public class FavoriteMovies extends Fragment {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    favoriteMovies.add(response.body());
-                    movieAdapter.notifyItemInserted(favoriteMovies.size() - 1);
+                    if (!addedMovieIds.contains(movieId)) {
+                        favoriteMovies.add(response.body());
+                        addedMovieIds.add(movieId);
+                        movieAdapter.notifyItemInserted(favoriteMovies.size() - 1);
+                    }
                 }
             }
 
@@ -98,5 +111,7 @@ public class FavoriteMovies extends Fragment {
             }
         });
     }
+
+
 
 }
