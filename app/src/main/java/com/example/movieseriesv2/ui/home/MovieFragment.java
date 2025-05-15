@@ -5,9 +5,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -32,15 +29,11 @@ public class MovieFragment extends Fragment {
     private RecyclerView recyclerView;
     private MovieAdapter movieAdapter;
     private MovieViewModel movieViewModel;
-    private List<Movie> allMovies = new ArrayList<>();  // Store all movies
+    private List<Movie> allMovies = new ArrayList<>();
+    private EditText searchInput;
+    private boolean isSearching = false;
 
     public MovieFragment() {}
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true); // Important for menu options (e.g. search)
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -48,39 +41,56 @@ public class MovieFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.movie_fragement, container, false);
 
-        // Initialize RecyclerView and Adapter
+        // Initialize RecyclerView and search input
         recyclerView = view.findViewById(R.id.recyclerView);
-        EditText searchInput = view.findViewById(R.id.search_input);
+        searchInput = view.findViewById(R.id.search_input);
 
         movieAdapter = new MovieAdapter(new ArrayList<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(movieAdapter);
 
-        // Initialize ViewModel
         movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
 
+        // Observe changes to the movie list
         movieViewModel.getMovieList().observe(getViewLifecycleOwner(), movies -> {
             if (movies != null) {
-                if (movieAdapter.getItemCount() == 0) {
-                    movieAdapter.updateMovies(movies);  // First load
-                } else {
-                    movieAdapter.addMovies(movies.subList(movieAdapter.getItemCount(), movies.size()));
-                }
+                movieAdapter.updateMovies(movies);
             }
         });
 
-        // Pagination: Load more movies when the user scrolls to the bottom
+        // Load initial popular movies
+        movieViewModel.loadPopularMovies();
+
+        // Search listener
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+                if (!query.isEmpty()) {
+                    isSearching = true;
+                    movieViewModel.searchMovies(query);
+                } else {
+                    isSearching = false;
+                    movieViewModel.getMovieList();
+                }
+            }
+
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        // Pagination for popular movies only
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if (layoutManager != null && layoutManager.findLastVisibleItemPosition() >= movieAdapter.getItemCount() - 5) {
-                    movieViewModel.loadMoreMovies();
+            @Override public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (!isSearching) {
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    if (layoutManager != null && layoutManager.findLastVisibleItemPosition() >= movieAdapter.getItemCount() - 5) {
+                        movieViewModel.loadMoreMovies();
+                    }
                 }
             }
         });
 
         return view;
     }
-
 }

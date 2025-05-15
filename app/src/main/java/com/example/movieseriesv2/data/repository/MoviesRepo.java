@@ -38,8 +38,13 @@ public class MoviesRepo {
         apiService.getMovieById(movieId, API_KEY).enqueue(callback);
     }
 
+    public void getPopularMovies(int page, Callback<MovieResponse> callback) {
+        apiService.getMovies(API_KEY, page).enqueue(callback);
+    }
 
-
+    public void searchMovies(String query, Callback<MovieResponse> callback) {
+        apiService.searchMovies(query, API_KEY).enqueue(callback);
+    }
 
 
 
