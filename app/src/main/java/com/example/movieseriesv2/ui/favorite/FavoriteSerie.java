@@ -60,13 +60,19 @@ public class FavoriteSerie extends Fragment {
 
         return view;
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadFavoriteSeries(); // reload every time the fragment is shown again
+    }
 
     private void loadFavoriteSeries() {
         viewModel.getFavoriteSeries(userId).observe(getViewLifecycleOwner(), favorites -> {
-            Log.d("FavoriteSerie", "Favorites loaded: " + favorites.size());
-            favoriteSeries.clear();
-            if (favorites.isEmpty()) {
-                Log.d("FavoritSerie", "No favorites found.");
+            favoriteSeries.clear(); // clear the old list
+            adapter.notifyDataSetChanged(); // tell adapter it's empty for now
+
+            if (favorites == null || favorites.isEmpty()) {
+                Log.d("FavoriteSerie", "No favorites found.");
                 return;
             }
 
@@ -79,22 +85,27 @@ public class FavoriteSerie extends Fragment {
     }
 
 
+
     private void fetchSerieById(int serieId) {
-        seriesRepo.getSerieById(serieId, new Callback<Serie>() {  // Correct method for fetching series
+        seriesRepo.getSerieById(serieId, new Callback<Serie>() {
             @Override
             public void onResponse(Call<Serie> call, Response<Serie> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("API_SERIE_RESULT", "Fetched serie: " + response.body().getName()); // or getTitle()
-                    favoriteSeries.add(response.body());
-                    adapter.notifyItemInserted(favoriteSeries.size() - 1);
+                    Serie serie = response.body();
 
+                    // ✅ Use stream to check for duplicates
+                    if (favoriteSeries.stream().noneMatch(s -> s.getId() == serie.getId())) {
+                        favoriteSeries.add(serie);
+                        adapter.notifyDataSetChanged();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<Serie> call, Throwable t) {
-                Log.e("FavoriteSeries", "Failed to load series with ID: " + serieId, t);
+                Log.e("FavoriteSerie", "Failed to fetch serie with id " + serieId, t);
             }
         });
     }
+
 }

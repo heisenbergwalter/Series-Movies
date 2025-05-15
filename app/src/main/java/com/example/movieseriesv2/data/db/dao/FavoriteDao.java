@@ -18,6 +18,9 @@ public interface FavoriteDao {
     @Query("DELETE FROM favorites WHERE title = :title AND user_id = :userId")
     void deleteFavorite(String title, int userId);
 
+    @Query("SELECT COUNT(*) FROM favorites WHERE id = :serieId AND user_id = :userId AND type = 'serie'")
+    int countFavorite(int serieId, int userId);
+
     @Query("SELECT * FROM favorites WHERE user_id = :userId")
     List<Favorite> getAllFavoritesForUser(int userId);
 

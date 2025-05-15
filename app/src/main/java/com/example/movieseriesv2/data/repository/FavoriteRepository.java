@@ -30,6 +30,9 @@ public class FavoriteRepository {
         favoriteDao = db.favoriteDao();
     }
 
+
+
+
     public void addFavorite(Favorite favorite) {
         Executors.newSingleThreadExecutor().execute(() -> favoriteDao.insertFavorite(favorite));
     }
@@ -64,5 +67,16 @@ public class FavoriteRepository {
         });
     }
 
+    public interface Callback<T> {
+        void onResult(T result);
+    }
 
+    public void isFavorite(int serieId, int userId, Callback<Boolean> callback) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            int count = favoriteDao.countFavorite(serieId, userId); // this method must be in your DAO
+            boolean exists = count > 0;
+            mainHandler.post(() -> callback.onResult(exists));
+        });
+
+    }
 }

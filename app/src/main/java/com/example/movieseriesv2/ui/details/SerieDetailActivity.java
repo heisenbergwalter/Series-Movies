@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.example.cinemaseries.R;
 import com.example.movieseriesv2.Utils.SessionManager;
 import com.example.movieseriesv2.data.db.entities.Favorite;
+import com.example.movieseriesv2.ui.favorite.FavoriteSerie;
 import com.example.movieseriesv2.ui.viewmodel.FavoriteViewModel;
 
 public class SerieDetailActivity extends AppCompatActivity {
@@ -31,7 +32,10 @@ public class SerieDetailActivity extends AppCompatActivity {
     SessionManager sessionManager;
 
     private ImageView poster;
-    private TextView title , overview, releaseDate, vote, language;
+    private TextView title, overview, releaseDate, vote, language;
+    private Button btn;
+
+    private Favorite currentFavorite; // Keep this to pass to removeFavorite
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +45,10 @@ public class SerieDetailActivity extends AppCompatActivity {
         poster = findViewById(R.id.series_poster);
         title = findViewById(R.id.series_title);
         overview = findViewById(R.id.series_overview);
-        releaseDate = findViewById(com.example.cinemaseries.R.id.series_air_date);
+        releaseDate = findViewById(R.id.series_air_date);
         vote = findViewById(R.id.series_vote);
-
         language = findViewById(R.id.series_language_popularity);
+        btn = findViewById(R.id.watch_now_button);
 
         viewModel = new ViewModelProvider(this,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
@@ -52,52 +56,63 @@ public class SerieDetailActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this.getApplicationContext());
 
-
-
         Intent intent = getIntent();
-        title.setText(intent.getStringExtra(EXTRA_NAME));
-        releaseDate.setText("First Air Date: " + intent.getStringExtra(EXTRA_DATE));
-        vote.setText("Rating: " + intent.getFloatExtra(EXTRA_VOTE, 0));
+        int serieId = intent.getIntExtra(EXTRAID, -1);
+        String serieName = intent.getStringExtra(EXTRA_NAME);
+        String seriePoster = intent.getStringExtra(EXTRA_POSTER);
+        String serieOverview = intent.getStringExtra(EXTRA_OVERVIEW);
+        String serieDate = intent.getStringExtra(EXTRA_DATE);
+        float serieVote = intent.getFloatExtra(EXTRA_VOTE, 0);
+        double seriePopularity = intent.getDoubleExtra(EXTRA_POPULARITY, 0);
+        String serieLanguage = intent.getStringExtra(EXTRA_LANGUAGE);
 
-        language.setText("Original Language: " + intent.getStringExtra(EXTRA_LANGUAGE) + "    |  Popularity : " +intent.getDoubleExtra(EXTRA_POPULARITY,0)  );
-        overview.setText(intent.getStringExtra(EXTRA_OVERVIEW));
+        // Set UI
+        title.setText(serieName);
+        releaseDate.setText("First Air Date: " + serieDate);
+        vote.setText("Rating: " + serieVote);
+        language.setText("Original Language: " + serieLanguage + "    |  Popularity: " + seriePopularity);
+        overview.setText(serieOverview);
 
         Glide.with(this)
-                .load("https://image.tmdb.org/t/p/w500" + intent.getStringExtra(EXTRA_POSTER))
+                .load("https://image.tmdb.org/t/p/w500" + seriePoster)
                 .into(poster);
 
+        if (serieId == -1) {
+            Toast.makeText(this, "Invalid serie ID!", Toast.LENGTH_SHORT).show();
+            Log.e("SerieDetailActivity", "Serie ID is missing or invalid.");
+            btn.setEnabled(false);
+            return;
+        }
 
-        Button btn = findViewById(R.id.watch_now_button);
+        int userId = sessionManager.getUserId();
 
-        btn.setOnClickListener(v -> {
-            if (sessionManager.isLoggedIn()) {
-                int movieId = getIntent().getIntExtra(EXTRAID, -1);
-                if (movieId == -1) {
-                    Toast.makeText(this, "Invalid serie ID!", Toast.LENGTH_SHORT).show();
-                    Log.e("MovieDetailActivity", "Serie ID is missing or invalid.");
+        currentFavorite = new Favorite();
+        currentFavorite.id = serieId;
+        currentFavorite.title = serieName;
+        currentFavorite.type = "serie";
+        currentFavorite.userId = userId;
+
+        // Observe if this serie is favorite or not:
+        viewModel.isFavorite(serieId, userId).observe(this, isFav -> {
+            if (isFav == null) return;
+
+            btn.setText(isFav ? "Remove from Favorites" : "Add to Favorites");
+
+            btn.setOnClickListener(v -> {
+                if (!sessionManager.isLoggedIn()) {
+                    Toast.makeText(this, "Please log in to add favorites.", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                if (isFav) {
+                    viewModel.removeFavorite(currentFavorite);
+                    Toast.makeText(this, "Serie removed from favorites", Toast.LENGTH_SHORT).show();
 
-                Favorite favorite = new Favorite();
-                favorite.id = movieId;
-                favorite.title = getIntent().getStringExtra(EXTRA_NAME);
-                favorite.type = "serie";
-                favorite.userId = sessionManager.getUserId();
-
-                Log.w("idUser", String.valueOf(favorite.userId));
-                Log.w("IDserie", String.valueOf(favorite.id));
-
-                viewModel.addFavorite(favorite);
-                Log.d("FavoriteDao", "Inserting favorite: " + favorite.getTitle());
-                Toast.makeText(this, "Serie added to favorites", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Please log in to add favorites.", Toast.LENGTH_SHORT).show();
-            }
+                    finish(); // Optional: close detail after removal
+                } else {
+                    viewModel.addFavorite(currentFavorite);
+                    Toast.makeText(this, "Serie added to favorites", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
-
     }
-
-
-
-
 }
