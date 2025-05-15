@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/profile"
+        android:title="Profile" />
+
+
+    <item
+        android:id="@+id/nav_movies"
+        android:icon="@drawable/movie"
+    android:title="Movies" />
+
+
+
+
+    <item
+        android:id="@+id/nav_series"
+        android:icon="@drawable/show"
+    android:title="Series" />
+
+
+
+    <item
+        android:id="@+id/nav_fav_m"
+        android:icon="@drawable/star"
+        android:title="Favorite Movies" />
+
+    <item
+        android:id="@+id/nav_fav_s"
+        android:icon="@drawable/star"
+        android:title="Favorite Series" />
+
+
+    <item
+        android:id="@+id/nav_users"
+        android:icon="@drawable/profile"
+        android:title="Users" />
+
+
+
+</menu>

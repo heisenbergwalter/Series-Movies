@@ -1,0 +1,43 @@
+<!-- activity_main.xml -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Normal UI including toolbar and drawer -->
+    <LinearLayout
+        android:id="@+id/mainContentLayout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <!-- Your current drawer and fragment container setup -->
+        <include layout="@layout/activity_main"/>
+    </LinearLayout>
+
+    <!-- No internet view -->
+    <LinearLayout
+        android:id="@+id/noInternetLayout"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#FFFFFF"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/noInternetImage"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/nonetwork"
+
+        android:layout_marginBottom="16dp" />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No Internet Connection"
+            android:textSize="20sp"
+            android:textColor="@android:color/holo_red_dark"/>
+    </LinearLayout>
+</FrameLayout>

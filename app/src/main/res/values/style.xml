@@ -1,0 +1,11 @@
+<resources>
+    <!-- Use Material Components theme -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme here -->
+    </style>
+    <style name="CustomRatingBar" >
+        <item name="colorAccent">@color/accent_yellow</item>
+    </style>
+
+
+</resources>

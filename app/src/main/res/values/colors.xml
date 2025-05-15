@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="dark_gray">#666666</color>
+    <color name="golden">#FFD700</color>
+
+    <color name="accent_yellow">#FFC107</color>
+    <color name="light_gray">#80FFFFFF</color>
+    <color name="background_gradient_start">#FF1E1E2E</color>
+    <color name="background_gradient_end">#FF2D2D3A</color>
+    <color name="poster_gradient_start">#40000000</color>
+    <color name="poster_gradient_end">#00000000</color>
+</resources>

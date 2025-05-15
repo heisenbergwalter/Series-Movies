@@ -1,0 +1,28 @@
+<!-- drawer_header.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:id="@+id/drawerHeaderImage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:src="@drawable/profile"
+        android:paddingBottom="20dp"/>
+
+    <TextView
+        android:id="@+id/drawerHeaderName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello Username"
+        android:clickable="true"
+        android:textSize="18sp"
+        android:paddingLeft="100sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
