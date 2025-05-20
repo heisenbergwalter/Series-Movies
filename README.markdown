@@ -11,6 +11,8 @@ https://github.com/heisenbergwalter/Series-Movies
 
 La navigation et la découverte des films et des séries, les favoris, le profil. L’inscription/la connexion, les détails des films/des séries, la sauvegarde des favoris localement.
 
+
+
 ## Les technologies
 
 - **L’API REST** : la récupération des données via TMDB.

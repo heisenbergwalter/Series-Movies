@@ -7,6 +7,8 @@
     android:padding="24dp"
     android:background="#0A0E27">
 
+
+
     <!-- App Logo -->
     <ImageView
         android:id="@+id/registerLogo"
